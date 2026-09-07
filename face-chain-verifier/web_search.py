@@ -10,6 +10,18 @@ IMAGE_UPLOAD_URL = "https://serpapi.com/image"
 SEARCH_URL = "https://serpapi.com/search"
 
 
+# Social-media domains we want to detect
+SOCIAL_DOMAINS = [
+    "instagram.com",
+    "x.com",
+    "twitter.com",
+    "facebook.com",
+    "tiktok.com",
+    "youtube.com",
+    "reddit.com"
+]
+
+
 def upload_image(image_path):
     """
     Upload a local image to SerpApi Image API.
@@ -17,7 +29,9 @@ def upload_image(image_path):
     """
 
     if not SERPAPI_KEY:
-        raise ValueError("SERPAPI_KEY is missing from .env")
+        raise ValueError(
+            "SERPAPI_KEY is missing from .env"
+        )
 
     if not os.path.exists(image_path):
         raise FileNotFoundError(
@@ -27,19 +41,14 @@ def upload_image(image_path):
     file_size = os.path.getsize(image_path)
 
     print("\n[2/6] Uploading image to SerpApi...")
+    print(f"      File: {os.path.basename(image_path)}")
+    print(f"      Size: {file_size / 1024:.1f} KB")
 
-    print(
-        f"      File: {os.path.basename(image_path)}"
-    )
-
-    print(
-        f"      Size: {file_size / 1024:.1f} KB"
-    )
-
+    # SerpApi Image API limit
     if file_size > 500 * 1024:
         raise ValueError(
             "Image is larger than 500 KB. "
-            "SerpApi Image API supports files up to 500 KB."
+            "Please use a smaller image."
         )
 
     with open(image_path, "rb") as image_file:
@@ -118,6 +127,9 @@ def search_google_lens(image_path):
 
 
 def extract_results(data):
+    """
+    Extract useful results from Google Lens response.
+    """
 
     results = []
 
@@ -144,3 +156,47 @@ def extract_results(data):
         })
 
     return results
+
+
+def find_social_match(results):
+    """
+    Find the first social-media result
+    from the Google Lens results.
+    """
+
+    print("\n[4/6] Finding social-media match...")
+
+    for result in results:
+
+        url = result.get("url", "").lower()
+
+        if not url:
+            continue
+
+        for domain in SOCIAL_DOMAINS:
+
+            if domain in url:
+
+                print("      ✓ Social-media candidate found")
+                print(f"      Platform : {domain}")
+                print(
+                    f"      Title    : "
+                    f"{result.get('title', '')}"
+                )
+                print(
+                    f"      URL      : "
+                    f"{result.get('url', '')}"
+                )
+
+                return {
+                    "platform": domain,
+                    "title": result.get("title", ""),
+                    "url": result.get("url", ""),
+                    "source": result.get("source", ""),
+                    "type": result.get("type", ""),
+                    "thumbnail": result.get("thumbnail", "")
+                }
+
+    print("      ❌ No social-media result found")
+
+    return None

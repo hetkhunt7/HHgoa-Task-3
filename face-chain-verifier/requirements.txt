@@ -4,3 +4,5 @@ Pillow
 deepface
 tf-keras
 opencv-python
+web3
+py-solc-x

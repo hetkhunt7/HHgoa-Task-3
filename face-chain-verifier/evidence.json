@@ -1,0 +1,14 @@
+{
+    "timestamp": "2026-09-07T18:11:05.780501+00:00",
+    "face": {
+        "model": "ArcFace",
+        "embedding_dimensions": 512
+    },
+    "social_match": {
+        "platform": "instagram.com",
+        "title": "Salman Khan close-up look grabs all the attention with his ...",
+        "url": "https://www.instagram.com/reel/DYsEzZZTfYT/",
+        "source": "Instagram",
+        "match_type": "visual"
+    }
+}
