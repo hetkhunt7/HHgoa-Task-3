@@ -13,55 +13,88 @@ def main():
 
     image_path = input("Enter image path: ").strip()
 
-    # -------------------------------
-    # FACE PROCESSING
-    # -------------------------------
-
-    try:
-        result = detect_and_encode(image_path)
-
-    except Exception as e:
-        print(f"\n❌ Face processing failed: {e}")
+    if not image_path:
+        print("❌ No image provided.")
         return
 
-    # -------------------------------
-    # WEB SEARCH
-    # -------------------------------
+    # ==========================================
+    # STEP 1 — FACE
+    # ==========================================
 
-    print("\n[2/3] Searching the web...")
-
-    # TEMPORARY:
-    # Google Lens requires a publicly accessible
-    # image URL in our current implementation.
-    image_url = input(
-        "\nEnter public URL of this image for Lens search: "
-    ).strip()
+    print("\n[1/6] Processing face...")
 
     try:
-        data = search_google_lens(image_url)
+
+        face_result = detect_and_encode(
+            image_path,
+            "face_crop.jpg"
+        )
+
+        print("      ✓ Face detected")
+        print("      ✓ ArcFace embedding generated")
+        print(
+            f"      Embedding dimensions: "
+            f"{len(face_result['embedding'])}"
+        )
+
+    except Exception as e:
+
+        print("\n❌ Face processing failed:")
+        print(e)
+
+        return
+
+    # ==========================================
+    # STEP 2 + 3 — GOOGLE LENS
+    # ==========================================
+
+    try:
+
+        data = search_google_lens(
+            image_path
+        )
+
         results = extract_results(data)
 
+        print(
+            f"      ✓ Results returned: "
+            f"{len(results)}"
+        )
+
     except Exception as e:
-        print(f"\n❌ Web search failed: {e}")
+
+        print("\n❌ Google Lens search failed:")
+        print(e)
+
         return
 
-    print(f"\n      ✓ Found {len(results)} results")
+    # ==========================================
+    # RESULTS
+    # ==========================================
 
-    # -------------------------------
-    # DISPLAY RESULTS
-    # -------------------------------
+    print("""
+══════════════════════════════════════════════
+             GOOGLE LENS RESULTS
+══════════════════════════════════════════════
+""")
 
-    print("\n══════════════════════════════════════")
-    print("        WEB SEARCH RESULTS")
-    print("══════════════════════════════════════")
+    if not results:
 
-    for i, result in enumerate(results[:10], 1):
+        print("❌ No visual matches found.")
 
-        print(f"\n[{i}] {result['title']}")
-        print(f"    Source: {result['source']}")
-        print(f"    URL   : {result['url']}")
+    else:
 
-    print("\n══════════════════════════════════════")
+        for i, result in enumerate(results[:15], 1):
+
+            print(f"[{i}] {result['title']}")
+            print(f"    Type   : {result['type']}")
+            print(f"    Source : {result['source']}")
+            print(f"    URL    : {result['url']}")
+            print()
+
+    print(
+        "══════════════════════════════════════════════"
+    )
 
 
 if __name__ == "__main__":
